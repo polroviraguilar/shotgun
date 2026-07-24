@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#06111e">
+  <meta name="description" content="Play Project Shotgun in the browser - a compact tactical duel by Pol Rovira.">
+  <title>Project Shotgun - Playable Web Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@1,6..72,600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a class="skip-link" href="#game">Skip to game</a>
+
+  <header class="site-header">
+    <a class="brand" href="https://polroviraguilar.github.io/" aria-label="Pol Rovira portfolio">
+      <span class="brand__mark" aria-hidden="true">PR</span>
+      <span>Pol Rovira</span>
+    </a>
+    <nav class="site-nav" aria-label="Demo navigation">
+      <a href="https://polroviraguilar.github.io/#/portfolio/shotgun">Case study</a>
+      <a href="https://github.com/polroviraguilar" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="demo-hero">
+      <div class="ambient ambient--cyan" aria-hidden="true"></div>
+      <div class="ambient ambient--pink" aria-hidden="true"></div>
+
+      <div class="intro reveal">
+        <p class="kicker"><span></span> Playable browser build</p>
+        <p class="meta">Unity 6000.0.65f1 / Solo project / Tactical combat</p>
+        <h1>Shotgun<br><em>Battle Grid</em></h1>
+        <p class="lead">A compact tactical duel where movement, ammunition and simultaneous actions turn a familiar mind game into readable spatial combat.</p>
+        <div class="intro__actions">
+          <a class="button button--line" href="https://polroviraguilar.github.io/#/portfolio/shotgun">Read the case study <span aria-hidden="true">↗</span></a>
+          <button class="button button--ghost" id="focus-game" type="button">Jump to game <span aria-hidden="true">↓</span></button>
+        </div>
+      </div>
+
+      <div class="game-column reveal" id="game">
+        <div class="game-shell">
+          <div class="game-toolbar">
+            <div>
+              <span class="status-dot" aria-hidden="true"></span>
+              <span id="build-status">Preparing build</span>
+            </div>
+            <button id="fullscreen-button" type="button" disabled>Fullscreen <span aria-hidden="true">↗</span></button>
+          </div>
+
+          <div class="game-stage" id="unity-container">
+            <canvas id="unity-canvas" width=1280 height=720 tabindex="0" aria-label="Project Shotgun game canvas"></canvas>
+
+            <div class="loading" id="loading-panel" role="status" aria-live="polite">
+              <div class="loading__symbol" aria-hidden="true">
+                <i></i><i></i><i></i>
+              </div>
+              <div class="loading__copy">
+                <strong>Loading combat systems</strong>
+                <span id="loading-label">0%</span>
+              </div>
+              <div class="loading__track" aria-hidden="true"><span id="loading-bar"></span></div>
+            </div>
+
+            <div class="build-error" id="build-error" hidden>
+              <p class="eyebrow">Build could not start</p>
+              <h2>Something interrupted the Web build.</h2>
+              <p id="build-error-message">Reload the page or try a current desktop browser.</p>
+              <button class="button button--primary" type="button" onclick="window.location.reload()">Reload demo</button>
+            </div>
+          </div>
+        </div>
+
+        <p class="game-caption"><span>01</span>Best experienced on desktop with sound enabled. Use the in-game interface to move, reload, shoot and shield.</p>
+      </div>
+    </section>
+
+    <section class="quick-read" aria-labelledby="quick-read-title">
+      <header class="section-heading reveal">
+        <span class="section-number">02</span>
+        <div>
+          <p class="eyebrow">Before you play</p>
+          <h2 id="quick-read-title">Three rules define every turn.</h2>
+        </div>
+        <p>The game resolves both fighters at the same time. Positioning changes whether a shot is dangerous, and clear audiovisual feedback explains the result before the next decision.</p>
+      </header>
+
+      <div class="rule-grid">
+        <article class="reveal"><span>01</span><h3>Move first</h3><p>Choose a grid position. Sharing a row creates a direct line of fire.</p></article>
+        <article class="reveal"><span>02</span><h3>Commit</h3><p>Reload, shoot or shield while the enemy AI selects its own action.</p></article>
+        <article class="reveal"><span>03</span><h3>Read the clash</h3><p>Projectiles can hit, miss, be blocked or collide in the middle.</p></article>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div>
+      <p class="eyebrow">Built by Pol Rovira</p>
+      <h2>Programming, game design, pixel art, shaders, interface and effects.</h2>
+    </div>
+    <div class="footer-links">
+      <a href="https://polroviraguilar.github.io/">Back to portfolio <span aria-hidden="true">↗</span></a>
+      <span>© <span id="current-year"></span> Pol Rovira</span>
+    </div>
+  </footer>
+
+  <script>
+    const canvas = document.querySelector("#unity-canvas");
+    const container = document.querySelector("#unity-container");
+    const loadingPanel = document.querySelector("#loading-panel");
+    const loadingBar = document.querySelector("#loading-bar");
+    const loadingLabel = document.querySelector("#loading-label");
+    const statusLabel = document.querySelector("#build-status");
+    const errorPanel = document.querySelector("#build-error");
+    const errorMessage = document.querySelector("#build-error-message");
+    const fullscreenButton = document.querySelector("#fullscreen-button");
+
+    const buildUrl = "Build";
+    const loaderUrl = buildUrl + "/site.loader.js";
+    const config = {
+      dataUrl: buildUrl + "/site.data.unityweb",
+      frameworkUrl: buildUrl + "/site.framework.js.unityweb",
+      codeUrl: buildUrl + "/site.wasm.unityweb",
+      streamingAssetsUrl: "StreamingAssets",
+      companyName: "DefaultCompany",
+      productName: "Project Shotgun",
+      productVersion: "1.0",
+      devicePixelRatio: Math.min(window.devicePixelRatio || 1, 2),
+      showBanner: (message, type) => {
+        if (type === "error") showBuildError(message);
+        else console.warn(message);
+      }
+    };
+
+
+    function showBuildError(message) {
+      loadingPanel.hidden = true;
+      errorPanel.hidden = false;
+      errorMessage.textContent = message || "Reload the page or try a current desktop browser.";
+      statusLabel.textContent = "Build unavailable";
+      container.classList.add("has-error");
+    }
+
+    const loaderScript = document.createElement("script");
+    loaderScript.src = loaderUrl;
+    loaderScript.onload = () => {
+      statusLabel.textContent = "Loading build";
+      createUnityInstance(canvas, config, (progress) => {
+        const percentage = Math.round(progress * 100);
+        loadingBar.style.width = percentage + "%";
+        loadingLabel.textContent = percentage + "%";
+      }).then((unityInstance) => {
+        loadingPanel.classList.add("is-complete");
+        statusLabel.textContent = "Build ready";
+        container.classList.add("is-ready");
+        fullscreenButton.disabled = false;
+        fullscreenButton.addEventListener("click", () => unityInstance.SetFullscreen(1));
+        window.setTimeout(() => { loadingPanel.hidden = true; }, 420);
+      }).catch((message) => showBuildError(String(message)));
+    };
+    loaderScript.onerror = () => showBuildError("The Unity loader could not be downloaded. Check the Build folder and file names.");
+    document.body.appendChild(loaderScript);
+  </script>
+  <script src="shotgun-page.js"></script>
+</body>
+</html>
